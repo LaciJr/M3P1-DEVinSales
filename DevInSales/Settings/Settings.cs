@@ -1,9 +1,9 @@
-﻿using System;
-
-public class Settings
+﻿
+namespace DevInSales.Settings 
 {
-	public Settings()
-	{
-		public static readonly string Secret = "DEVINSECRET"
-	}
+    public class Settings
+    {
+        public static readonly string Secret = "DEVINSECRET";
+    }
+
 }

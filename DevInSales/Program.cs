@@ -1,10 +1,9 @@
 using DevInSales.Context;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.IdentityModel.Tokens;
-using DevInSales.Seeds;
 using Microsoft.EntityFrameworkCore;
+using DevInSales.Settings;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
