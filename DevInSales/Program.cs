@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.IdentityModel.Tokens;
 using DevInSales.Seeds;
-using DevInSales.Settings;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -24,6 +23,8 @@ builder.Services.AddSwaggerGen(opt =>
 
 builder.Services.AddDbContext<SqlContext>(options=>options.UseSqlServer(builder.Configuration.GetConnectionString("ServerConnection")));
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(); 
+
+var key = Encoding.ASCII.GetBytes(Settings.Secret);
 
 builder.Services.AddAuthentication(x =>
 {
