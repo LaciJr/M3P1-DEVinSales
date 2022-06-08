@@ -28,6 +28,7 @@ namespace DevInSales.Controllers
         [Route("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult Login([FromBody] LoginDTO login)
         {
             try
@@ -42,7 +43,7 @@ namespace DevInSales.Controllers
             }
             catch(Exception ex)
             {
-                throw new Exception($"{ex.Message}");
+                return BadRequest($"{ex.Message}");
             }
 
         }
