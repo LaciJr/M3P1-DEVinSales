@@ -1,9 +1,10 @@
 using DevInSales.Context;
-
-
-
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.IdentityModel.Tokens;
 using DevInSales.Seeds;
-
+using DevInSales.Settings;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -24,6 +25,23 @@ builder.Services.AddSwaggerGen(opt =>
 builder.Services.AddDbContext<SqlContext>(options=>options.UseSqlServer(builder.Configuration.GetConnectionString("ServerConnection")));
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(); 
 
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(x =>
+{
+    x.RequireHttpsMetadata = false;
+    x.SaveToken = true;
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = false,
+        ValidateAudience = false
+    };
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -35,6 +53,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
