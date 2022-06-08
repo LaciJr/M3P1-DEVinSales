@@ -19,7 +19,7 @@ namespace DevInSales.Seeds
             BirthDate = new DateTime(1974, 4, 11),
             Email = "gustavo_levi_ferreira@gmail.com",
             Password = "!romeu321",
-            ProfileId = 1
+            ProfileId = 2
         }, new User()
         {
             Id = 3,
@@ -27,7 +27,7 @@ namespace DevInSales.Seeds
             BirthDate = new DateTime(1986, 3, 14),
             Email = "lemosluiz@gmail.com",
             Password = "lemos$2022",
-            ProfileId = 1
+            ProfileId = 3
         }, new User()
         {
             Id = 4,
