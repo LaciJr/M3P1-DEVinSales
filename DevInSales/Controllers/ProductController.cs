@@ -5,6 +5,7 @@ using DevInSales.Context;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,6 +13,7 @@ namespace DevInSales.Controllers
 {
     [Route("api/product")]
     [ApiController]
+    [Authorize]
 
     public class ProductController : ControllerBase
     {
@@ -36,6 +38,7 @@ namespace DevInSales.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<ProductGetDTO>>> GetProduct(string? name, decimal? price_min, decimal? price_max)
         {
             if (price_max < price_min)
@@ -78,6 +81,7 @@ namespace DevInSales.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "Gerente,Administrador")]
         public async Task<ActionResult<Product>> PostProduct([FromBody] ProductPostAndPutDTO product)
         {
             bool productNameExists = _sqlContext.Product.Any(x => x.Name == product.Name);
@@ -110,6 +114,7 @@ namespace DevInSales.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "Gerente,Administrador")]
         public async Task<ActionResult<Product>> PutProduct(int id, ProductPostAndPutDTO product)
         {
             bool productIdExists = _sqlContext.Product.Any(x => x.Id == id);
@@ -170,6 +175,7 @@ namespace DevInSales.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPatch("{id}")]
+        [Authorize(Roles = "Gerente,Administrador")]
         public async Task<ActionResult<Product>> PatchProduct(int id, ProductPatchDTO productModel)
         {
             var product = await _sqlContext.Product.FindAsync(id);
@@ -227,6 +233,7 @@ namespace DevInSales.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteProduct([FromRoute] int product_id)
         {
             var productIdEncontrado = await _sqlContext.Product.FindAsync(product_id);
