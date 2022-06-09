@@ -6,14 +6,14 @@ using System.Text;
 
 namespace DevInSales.Services
 {
-    public class TokenService
+    public static class TokenService
     {
-        public static string GenerateToken(User user)
+        public static string GenerateToken(string name, string role)
         {
             var claims = new Claim[]
             {
-                new Claim(ClaimTypes.Name, user.Name.ToString()),
-                new Claim(ClaimTypes.Role, user.Profile.Role)
+                new Claim(ClaimTypes.Name, name),
+                new Claim(ClaimTypes.Role, role)
             };
 
             return GenerateToken(claims);

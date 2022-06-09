@@ -33,11 +33,16 @@ namespace DevInSales.Controllers
         {
             try
             {
-                var user = (User)_context.User.Where(ob => ob.Email.ToLower() == login.Email.ToLower() && ob.Password.ToLower() == login.Password.ToLower());
+                var user = _context.User.First(obj => obj.Email.ToLower() == login.Email.ToLower() && obj.Password.ToLower() == login.Password.ToLower());
 
-                if (user == null) return NotFound("Usuário ou senha incorreta");
+                if (user == null)
+                {
+                    return NotFound("Usuário ou senha incorreta");
+                }
 
-                var token = TokenService.GenerateToken(user);
+                var profile = _context.Profile.First(obj => obj.Id == user.ProfileId);
+
+                var token = TokenService.GenerateToken(user.Name, profile.Role);
 
                 return Ok(new {token});
             }
