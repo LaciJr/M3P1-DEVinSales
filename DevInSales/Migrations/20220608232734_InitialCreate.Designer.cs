@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DevInSales.Migrations
 {
     [DbContext(typeof(SqlContext))]
-    [Migration("20220507175458_InclusaoEmpresaPadraoSeed")]
-    partial class InclusaoEmpresaPadraoSeed
+    [Migration("20220608232734_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -40,7 +40,6 @@ namespace DevInSales.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Complement")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Number")
@@ -33700,7 +33699,7 @@ namespace DevInSales.Migrations
                     b.Property<int>("AddressId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Delivery_Date")
+                    b.Property<DateTime?>("Delivery_Date")
                         .HasColumnType("date")
                         .HasColumnName("delivery_Date");
 
@@ -33737,11 +33736,13 @@ namespace DevInSales.Migrations
                         .HasColumnType("date")
                         .HasColumnName("date_order");
 
-                    b.Property<int?>("OrderProductId")
-                        .HasColumnType("int");
-
                     b.Property<int>("SellerId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Shipping_Company")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("shipping_Company");
 
                     b.Property<decimal>("Shipping_Company_Price")
                         .HasColumnType("decimal")
@@ -33751,8 +33752,6 @@ namespace DevInSales.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("OrderProductId");
 
                     b.HasIndex("SellerId");
 
@@ -33773,11 +33772,21 @@ namespace DevInSales.Migrations
                         .HasColumnType("int")
                         .HasColumnName("amount");
 
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Unit_Price")
                         .HasColumnType("decimal")
                         .HasColumnName("unit_price");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("Order_Product");
                 });
@@ -33799,9 +33808,6 @@ namespace DevInSales.Migrations
                         .HasColumnType("varchar(100)")
                         .HasColumnName("name");
 
-                    b.Property<int?>("OrderProductId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("Suggested_Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)")
@@ -33810,8 +33816,6 @@ namespace DevInSales.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
-
-                    b.HasIndex("OrderProductId");
 
                     b.ToTable("Product");
 
@@ -33897,10 +33901,14 @@ namespace DevInSales.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("Name")
+                    b.Property<int>("Permissao")
+                        .HasColumnType("int")
+                        .HasColumnName("Permissão");
+
+                    b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("name");
+                        .HasColumnName("Role");
 
                     b.HasKey("Id");
 
@@ -33910,7 +33918,20 @@ namespace DevInSales.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Cliente"
+                            Permissao = 1,
+                            Role = "Usuário"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Permissao = 2,
+                            Role = "Gerente"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Permissao = 3,
+                            Role = "Administrador"
                         });
                 });
 
@@ -34309,7 +34330,7 @@ namespace DevInSales.Migrations
                             Email = "gustavo_levi_ferreira@gmail.com",
                             Name = "Gustavo Levi Ferreira",
                             Password = "!romeu321",
-                            ProfileId = 1
+                            ProfileId = 2
                         },
                         new
                         {
@@ -34318,7 +34339,7 @@ namespace DevInSales.Migrations
                             Email = "lemosluiz@gmail.com",
                             Name = "Henrique Luiz Lemos",
                             Password = "lemos$2022",
-                            ProfileId = 1
+                            ProfileId = 3
                         },
                         new
                         {
@@ -34393,10 +34414,6 @@ namespace DevInSales.Migrations
 
             modelBuilder.Entity("DevInSales.Models.Order", b =>
                 {
-                    b.HasOne("DevInSales.Models.OrderProduct", null)
-                        .WithMany("Orders")
-                        .HasForeignKey("OrderProductId");
-
                     b.HasOne("DevInSales.Models.User", "Seller")
                         .WithMany()
                         .HasForeignKey("SellerId")
@@ -34414,6 +34431,25 @@ namespace DevInSales.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DevInSales.Models.OrderProduct", b =>
+                {
+                    b.HasOne("DevInSales.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DevInSales.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("DevInSales.Models.Product", b =>
                 {
                     b.HasOne("DevInSales.Models.Category", "Category")
@@ -34421,10 +34457,6 @@ namespace DevInSales.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("DevInSales.Models.OrderProduct", null)
-                        .WithMany("Products")
-                        .HasForeignKey("OrderProductId");
 
                     b.Navigation("Category");
                 });
@@ -34462,13 +34494,6 @@ namespace DevInSales.Migrations
             modelBuilder.Entity("DevInSales.Models.Category", b =>
                 {
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("DevInSales.Models.OrderProduct", b =>
-                {
-                    b.Navigation("Orders");
-
-                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

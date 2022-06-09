@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DevInSales.Migrations
 {
-    public partial class initialcreate : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -24,26 +24,13 @@ namespace DevInSales.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Order_Product",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    unit_price = table.Column<decimal>(type: "decimal", nullable: false),
-                    amount = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Order_Product", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Profile",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Permissão = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -85,8 +72,7 @@ namespace DevInSales.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     name = table.Column<string>(type: "varchar(100)", nullable: false),
                     suggested_price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false),
-                    OrderProductId = table.Column<int>(type: "int", nullable: true)
+                    CategoryId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -97,11 +83,6 @@ namespace DevInSales.Migrations
                         principalTable: "Category",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Product_Order_Product_OrderProductId",
-                        column: x => x.OrderProductId,
-                        principalTable: "Order_Product",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -183,17 +164,12 @@ namespace DevInSales.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     SellerId = table.Column<int>(type: "int", nullable: false),
                     date_order = table.Column<DateTime>(type: "date", nullable: false),
-                    shipping_company_price = table.Column<decimal>(type: "decimal", nullable: false),
-                    OrderProductId = table.Column<int>(type: "int", nullable: true)
+                    shipping_Company = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    shipping_company_price = table.Column<decimal>(type: "decimal", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Order", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_Order_Order_Product_OrderProductId",
-                        column: x => x.OrderProductId,
-                        principalTable: "Order_Product",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Order_User_SellerId",
                         column: x => x.SellerId,
@@ -218,7 +194,7 @@ namespace DevInSales.Migrations
                     Street = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CEP = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Number = table.Column<int>(type: "int", nullable: false),
-                    Complement = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Complement = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -259,6 +235,34 @@ namespace DevInSales.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Order_Product",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    unit_price = table.Column<decimal>(type: "decimal", nullable: false),
+                    amount = table.Column<int>(type: "int", nullable: false),
+                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Order_Product", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Order_Product_Order_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Order",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Order_Product_Product_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Product",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Delivery",
                 columns: table => new
                 {
@@ -267,7 +271,7 @@ namespace DevInSales.Migrations
                     OrderId = table.Column<int>(type: "int", nullable: false),
                     AddressId = table.Column<int>(type: "int", nullable: false),
                     delivery_Forecast = table.Column<DateTime>(type: "date", nullable: false),
-                    delivery_Date = table.Column<DateTime>(type: "date", nullable: false),
+                    delivery_Date = table.Column<DateTime>(type: "date", nullable: true),
                     status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -294,8 +298,13 @@ namespace DevInSales.Migrations
 
             migrationBuilder.InsertData(
                 table: "Profile",
-                columns: new[] { "id", "name" },
-                values: new object[] { 1, "Cliente" });
+                columns: new[] { "id", "Permissão", "Role" },
+                values: new object[,]
+                {
+                    { 1, 1, "Usuário" },
+                    { 2, 2, "Gerente" },
+                    { 3, 3, "Administrador" }
+                });
 
             migrationBuilder.InsertData(
                 table: "ShippingCompany",
@@ -304,7 +313,8 @@ namespace DevInSales.Migrations
                 {
                     { 1, "Rapidex" },
                     { 2, "Veloz e Feroz" },
-                    { 3, "Além Paraíba" }
+                    { 3, "Além Paraíba" },
+                    { 4, "Empresa Padrão" }
                 });
 
             migrationBuilder.InsertData(
@@ -6846,19 +6856,19 @@ namespace DevInSales.Migrations
 
             migrationBuilder.InsertData(
                 table: "Product",
-                columns: new[] { "id", "CategoryId", "name", "OrderProductId", "suggested_price" },
+                columns: new[] { "id", "CategoryId", "name", "suggested_price" },
                 values: new object[,]
                 {
-                    { 1, 1, "Curso de C Sharp", null, 259.99m },
-                    { 2, 1, "Curso de Java", null, 249.99m },
-                    { 3, 1, "Curso de Delphi", null, 189.99m },
-                    { 4, 1, "Curso de React", null, 289.99m },
-                    { 5, 1, "Curso de HTML5 e CSS3", null, 139.99m },
-                    { 6, 1, "Curso de JavaScript", null, 219.99m },
-                    { 7, 1, "Curso de Angular", null, 199.99m },
-                    { 8, 1, "Curso de Ruby", null, 319.99m },
-                    { 9, 1, "Curso de Kotlin", null, 289.99m },
-                    { 10, 1, "Curso de Python", null, 229.99m }
+                    { 1, 1, "Curso de C Sharp", 259.99m },
+                    { 2, 1, "Curso de Java", 249.99m },
+                    { 3, 1, "Curso de Delphi", 189.99m },
+                    { 4, 1, "Curso de React", 289.99m },
+                    { 5, 1, "Curso de HTML5 e CSS3", 139.99m },
+                    { 6, 1, "Curso de JavaScript", 219.99m },
+                    { 7, 1, "Curso de Angular", 199.99m },
+                    { 8, 1, "Curso de Ruby", 319.99m },
+                    { 9, 1, "Curso de Kotlin", 289.99m },
+                    { 10, 1, "Curso de Python", 229.99m }
                 });
 
             migrationBuilder.InsertData(
@@ -6881,7 +6891,10 @@ namespace DevInSales.Migrations
                     { 6, 37m, 2, 33 },
                     { 7, 10m, 3, 11 },
                     { 8, 35m, 3, 22 },
-                    { 9, 33m, 3, 33 }
+                    { 9, 33m, 3, 33 },
+                    { 10, 5m, 4, 11 },
+                    { 11, 6m, 4, 22 },
+                    { 12, 7m, 4, 33 }
                 });
 
             migrationBuilder.InsertData(
@@ -6890,8 +6903,8 @@ namespace DevInSales.Migrations
                 values: new object[,]
                 {
                     { 1, new DateTime(2000, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "romeu@lenda.com", "Romeu A Lenda", "romeu123@", 1 },
-                    { 2, new DateTime(1974, 4, 11, 0, 0, 0, 0, DateTimeKind.Unspecified), "gustavo_levi_ferreira@gmail.com", "Gustavo Levi Ferreira", "!romeu321", 1 },
-                    { 3, new DateTime(1986, 3, 14, 0, 0, 0, 0, DateTimeKind.Unspecified), "lemosluiz@gmail.com", "Henrique Luiz Lemos", "lemos$2022", 1 },
+                    { 2, new DateTime(1974, 4, 11, 0, 0, 0, 0, DateTimeKind.Unspecified), "gustavo_levi_ferreira@gmail.com", "Gustavo Levi Ferreira", "!romeu321", 2 },
+                    { 3, new DateTime(1986, 3, 14, 0, 0, 0, 0, DateTimeKind.Unspecified), "lemosluiz@gmail.com", "Henrique Luiz Lemos", "lemos$2022", 3 },
                     { 4, new DateTime(1996, 8, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "tomas.paulo.aragao@hotmail.com", "Tomás Paulo Aragão", "$tpa1996", 1 }
                 });
 
@@ -6918,7 +6931,10 @@ namespace DevInSales.Migrations
                     { 6, 23m, 2, 3 },
                     { 7, 31m, 3, 1 },
                     { 8, 32m, 3, 2 },
-                    { 9, 33m, 3, 3 }
+                    { 9, 33m, 3, 3 },
+                    { 10, 5m, 1, 4 },
+                    { 11, 6m, 2, 4 },
+                    { 12, 7m, 3, 4 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -6952,11 +6968,6 @@ namespace DevInSales.Migrations
                 column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Order_OrderProductId",
-                table: "Order",
-                column: "OrderProductId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Order_SellerId",
                 table: "Order",
                 column: "SellerId");
@@ -6967,14 +6978,19 @@ namespace DevInSales.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Order_Product_OrderId",
+                table: "Order_Product",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Order_Product_ProductId",
+                table: "Order_Product",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Product_CategoryId",
                 table: "Product",
                 column: "CategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Product_OrderProductId",
-                table: "Product",
-                column: "OrderProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StatePrice_ShippingCompanyId",
@@ -7001,7 +7017,7 @@ namespace DevInSales.Migrations
                 name: "Delivery");
 
             migrationBuilder.DropTable(
-                name: "Product");
+                name: "Order_Product");
 
             migrationBuilder.DropTable(
                 name: "StatePrice");
@@ -7013,7 +7029,7 @@ namespace DevInSales.Migrations
                 name: "Order");
 
             migrationBuilder.DropTable(
-                name: "Category");
+                name: "Product");
 
             migrationBuilder.DropTable(
                 name: "ShippingCompany");
@@ -7022,10 +7038,10 @@ namespace DevInSales.Migrations
                 name: "City");
 
             migrationBuilder.DropTable(
-                name: "Order_Product");
+                name: "User");
 
             migrationBuilder.DropTable(
-                name: "User");
+                name: "Category");
 
             migrationBuilder.DropTable(
                 name: "State");
