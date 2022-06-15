@@ -123,4 +123,64 @@ public class StateControllerUnitTest
 
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
     }
+
+    [Test]
+    public async Task PutStateUsandoIdDiferenteDoStateId()
+    {
+        var state = new State
+        {
+            Id = 42,
+            Name = "Santa Catarina",
+            Initials = "SC"
+        };
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.PutState(1, state);
+
+        var expected = result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+    }
+
+    [Test]
+    public async Task PutState()
+    {
+        var state = new State
+        {
+            Id = 42,
+            Name = "Santa Catarina",
+            Initials = "SC"
+        };
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.PutState(42, state);
+
+        var expected = result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("204"));
+    }
+
+    [Test]
+    public async Task PutStateDeStateInexistente()
+    {
+        var state = new State
+        {
+            Id = 100,
+            Name = "Abacaxi",
+            Initials = "AB"
+        };
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.PutState(100, state);
+
+        var expected = result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
+    }
 }
