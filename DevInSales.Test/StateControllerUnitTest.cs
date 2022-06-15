@@ -47,4 +47,37 @@ public class StateControllerUnitTest
         Assert.That(content.Count, Is.EqualTo(27));
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
     }
+
+    [Test]
+    public async Task GetStateFiltrandoPeloNome()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.GetState("Santa Catarina");
+
+        var expected = (result.Result as ObjectResult);
+
+        var content = expected.Value as List<State>;
+
+        Assert.That(content.Count, Is.EqualTo(1));
+        Assert.That(content[0].Name, Is.EqualTo("Santa Catarina"));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
+    }
+
+    [Test]
+    public async Task GetStateFiltrandoPorNomeInexistente()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.GetState("Abacaxi");
+
+        var expected = result.Result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("204"));
+    }
+
 }
