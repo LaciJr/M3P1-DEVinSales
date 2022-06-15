@@ -35,13 +35,13 @@ public class UserControllerUnitTest
     }
 
     [Test]
-    public async Task GetUsersSemUsersCriados()
+    public async Task GetUsersPorNameInexistente_DeveRetornarNotFound()
     {
         var context = new SqlContext(_contextOptions);
 
         var controller = new UserController(context);
 
-        var result = await controller.Get("Test", "25/03/1997", "14/06/2022");
+        var result = await controller.Get("TESTE", null, null);
 
         var expected = (result.Result as ObjectResult).Value;
 
