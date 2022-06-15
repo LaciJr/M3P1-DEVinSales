@@ -1,12 +1,9 @@
 using DevInSales.Context;
 using DevInSales.Controllers;
 using DevInSales.DTOs;
-using DevInSales.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Moq;
-using System.Net;
 
 namespace DevInSales.Test;
 
