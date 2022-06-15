@@ -45,7 +45,7 @@ public class UserControllerUnitTest
 
         var expected = (result.Result as ObjectResult).Value as List<UserResponseDTO>;
 
-        Assert.That(expected.Count, Is.EqualTo(5));
+        Assert.That(expected.Count, Is.EqualTo(4));
     }
 
     [Test]
@@ -235,5 +235,31 @@ public class UserControllerUnitTest
         Assert.That(expected.ToString(), Is.EqualTo("O perfil informado não foi encontrado."));
     }
 
+    [Test]
+    public void DeleteUserTest()
+    {
+        var context = new SqlContext(_contextOptions);
 
+        var controller = new UserController(context);
+
+        var result = controller.DeleteUser(5);
+
+        var expected = (result.Result as ObjectResult).Value;
+
+        Assert.That(expected.ToString(), Is.EqualTo("5"));
+    }
+
+    [Test]
+    public void DeleteUserComIdInvalido()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new UserController(context);
+
+        var result = controller.DeleteUser(0);
+
+        var expected = (result.Result as ObjectResult).Value;
+
+        Assert.That(expected.ToString(), Is.EqualTo("O Id de Usuário de número 0 não foi encontrado."));
+    }
 }
