@@ -80,4 +80,33 @@ public class StateControllerUnitTest
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("204"));
     }
 
+    [Test]
+    public async Task GetStateIdUsandoId()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.GetStateId(42);
+
+        var expected = (result.Result as ObjectResult);
+
+        Assert.That(expected.Value.ToString().Contains("State_Id encontrado com sucesso"));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
+    }
+
+    [Test]
+    public async Task GetStateIdUsandoIdInexistente()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.GetStateId(0);
+
+        var expected = (result.Result as ObjectResult);
+
+        Assert.That(expected.Value.ToString(), Is.EqualTo("{ message = State_Id não encontrado }"));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
+    }
 }
