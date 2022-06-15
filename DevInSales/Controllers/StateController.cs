@@ -63,19 +63,19 @@ namespace DevInSales.Controllers
         }
 
         // GET: api/State/5
-        [HttpGet("{id}")]
-        [Authorize]
-        public async Task<ActionResult<State>> GetState(int id)
-        {
-            var state = await _context.State.FindAsync(id);
+        //[HttpGet("{id}")]
+        //[Authorize]
+        //public async Task<ActionResult<State>> GetState(int id)
+        //{
+        //    var state = await _context.State.FindAsync(id);
 
-            if (state == null)
-            {
-                return NotFound();
-            }
+        //    if (state == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return state;
-        }
+        //    return state;
+        //}
 
         [HttpGet("{State_Id}/city")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
