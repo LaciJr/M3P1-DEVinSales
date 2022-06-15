@@ -35,7 +35,7 @@ public class UserControllerUnitTest
     }
 
     [Test]
-    public async Task GetUsersPorNameInexistente_DeveRetornarNotFound()
+    public async Task GetUsersFiltrandoPorNameInexistente()
     {
         var context = new SqlContext(_contextOptions);
 
@@ -47,6 +47,22 @@ public class UserControllerUnitTest
 
         Assert.That(expected.ToString(), Is.EqualTo("Nenhum usuário foi encontrado."));
     }
+
+    [Test]
+    public async Task GetUsersTestFiltrandoPorNome()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new UserController(context);
+
+        var result = await controller.Get("Romeu", null, null);
+
+        var expected = (result.Result as ObjectResult).Value as List<UserResponseDTO>;
+
+        Assert.That(expected.Count, Is.EqualTo(1));
+        Assert.That(expected[0].Name.Contains("Romeu"));
+    }
+
 
     [Test]
     public async Task CreateUserTest()
