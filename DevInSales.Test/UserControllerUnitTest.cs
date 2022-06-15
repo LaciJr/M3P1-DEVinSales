@@ -41,7 +41,7 @@ public class UserControllerUnitTest
 
         var controller = new UserController(context);
 
-        var result = await controller.Get("TESTE", null, null);
+        var result = await controller.Get("TESTE", "25/03/1997", "14/06/2022");
 
         var expected = (result.Result as ObjectResult).Value;
 
