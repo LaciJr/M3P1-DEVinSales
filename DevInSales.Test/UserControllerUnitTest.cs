@@ -35,6 +35,20 @@ public class UserControllerUnitTest
     }
 
     [Test]
+    public async Task GetUsersTestSemFiltro()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new UserController(context);
+
+        var result = await controller.Get(null, null, null);
+
+        var expected = (result.Result as ObjectResult).Value as List<UserResponseDTO>;
+
+        Assert.That(expected.Count, Is.EqualTo(5));
+    }
+
+    [Test]
     public async Task GetUsersFiltrandoPorNameInexistente()
     {
         var context = new SqlContext(_contextOptions);
@@ -63,6 +77,36 @@ public class UserControllerUnitTest
         Assert.That(expected[0].Name.Contains("Romeu"));
     }
 
+    [Test]
+    public async Task GetUsersTestFiltrandoPorDataMinima()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new UserController(context);
+
+        var result = await controller.Get(null, "01/02/2000", null);
+
+        var expected = (result.Result as ObjectResult).Value as List<UserResponseDTO>;
+
+        Assert.That(expected.Count, Is.EqualTo(1));
+        Assert.That(expected[0].Name.Contains("Romeu"));
+    }
+
+    [Test]
+    public async Task GetUsersTestFiltrandoPorDataMaxima()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new UserController(context);
+
+        var result = await controller.Get(null, null, "11/04/1974");
+
+        var expected = (result.Result as ObjectResult).Value as List<UserResponseDTO>;
+
+        Assert.That(expected.Count, Is.EqualTo(1));
+        Assert.That(expected[0].Name.Contains("Gustavo"));
+    }
+
 
     [Test]
     public async Task CreateUserTest()
@@ -85,4 +129,111 @@ public class UserControllerUnitTest
         Assert.That(expected.ToString(), Is.EqualTo("{ id = 5 }"));
 
     }
+
+    [Test]
+    public async Task CreateUserMenorDeIdade()
+    {
+        UserCreateDTO userDTO = new UserCreateDTO();
+        userDTO.BirthDate = "25/03/2018";
+        userDTO.Email = "test123@test123.com";
+        userDTO.Name = "Teste";
+        userDTO.Password = "1234";
+        userDTO.ProfileId = 1;
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new UserController(context);
+
+        var result = await controller.Create(userDTO);
+
+        var expected = (result.Result as ObjectResult).Value;
+
+        Assert.That(expected.ToString(), Is.EqualTo("O usuário deve ser maior de 18 anos."));
+    }
+
+    [Test]
+    public async Task CreateUserDataAoContrario()
+    {
+        UserCreateDTO userDTO = new UserCreateDTO();
+        userDTO.BirthDate = "03/25/2018";
+        userDTO.Email = "test123@test123.com";
+        userDTO.Name = "Teste";
+        userDTO.Password = "1234";
+        userDTO.ProfileId = 1;
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new UserController(context);
+
+        var result = await controller.Create(userDTO);
+
+        var expected = (result.Result as ObjectResult).Value;
+
+        Assert.That(expected.ToString(), Is.EqualTo("Data inválida."));
+    }
+
+    [Test]
+    public async Task CreateUserSenhaInvalida()
+    {
+        UserCreateDTO userDTO = new UserCreateDTO();
+        userDTO.BirthDate = "25/03/1998";
+        userDTO.Email = "test123@test123.com";
+        userDTO.Name = "Teste";
+        userDTO.Password = "111";
+        userDTO.ProfileId = 1;
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new UserController(context);
+
+        var result = await controller.Create(userDTO);
+
+        var expected = (result.Result as ObjectResult).Value;
+
+        Assert.That(expected.ToString(), Is.EqualTo("Senha inválida. Deve-se ter pelo menos um caractere diferente dos demais."));
+    }
+
+    [Test]
+    public async Task CreateUserEmailJaExiste()
+    {
+        UserCreateDTO userDTO = new UserCreateDTO();
+        userDTO.BirthDate = "25/03/1998";
+        userDTO.Email = "romeu@lenda.com";
+        userDTO.Name = "Teste";
+        userDTO.Password = "1234";
+        userDTO.ProfileId = 1;
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new UserController(context);
+
+        var result = await controller.Create(userDTO);
+
+        var expected = (result.Result as ObjectResult).Value;
+
+        Assert.That(expected.ToString(), Is.EqualTo("O email informado já existe."));
+    }
+
+    [Test]
+    public async Task CreateUserProfileIdInvalido()
+    {
+        UserCreateDTO userDTO = new UserCreateDTO();
+        userDTO.BirthDate = "25/03/1998";
+        userDTO.Email = "test123@test123.com";
+        userDTO.Name = "Teste";
+        userDTO.Password = "1234";
+        userDTO.ProfileId = 4;
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new UserController(context);
+
+        var result = await controller.Create(userDTO);
+
+        var expected = (result.Result as ObjectResult).Value;
+
+        Assert.That(expected.ToString(), Is.EqualTo("O perfil informado não foi encontrado."));
+    }
+
+
 }
