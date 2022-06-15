@@ -255,4 +255,43 @@ public class StateControllerUnitTest
 
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
     }
+
+    [Test]
+    public async Task DeleteStateUsandoStateIdInexistente()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.DeleteState(0);
+
+        var expected = result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
+    }
+
+    [Test]
+    public async Task DeleteStateTest()
+    {
+        var context = new SqlContext(_contextOptions);
+        
+        var qtdState = context.State.Count();
+        
+        var state = new State
+        {
+            Id = 101,
+            Name = "Abacaxi",
+            Initials = "AB"
+        };
+        context.State.Add(state);
+
+        var controller = new StateController(context);
+
+        var result = await controller.DeleteState(101);
+
+        var expected = result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("204"));
+        Assert.That(context.State.Count() == qtdState);
+    }
 }
