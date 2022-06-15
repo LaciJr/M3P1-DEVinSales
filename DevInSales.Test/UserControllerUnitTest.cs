@@ -124,9 +124,10 @@ public class UserControllerUnitTest
 
         var result = await controller.Create(userDTO);
 
-        var expected = (result.Result as ObjectResult).Value;
+        var expected = (result.Result as ObjectResult);
 
-        Assert.That(expected.ToString(), Is.EqualTo("{ id = 5 }"));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("201"));
+        Assert.That(context.User.Count() == 5);
 
     }
 
@@ -244,9 +245,10 @@ public class UserControllerUnitTest
 
         var result = controller.DeleteUser(5);
 
-        var expected = (result.Result as ObjectResult).Value;
+        var expected = (result.Result as ObjectResult);
 
-        Assert.That(expected.ToString(), Is.EqualTo("5"));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("5"));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
     }
 
     [Test]
