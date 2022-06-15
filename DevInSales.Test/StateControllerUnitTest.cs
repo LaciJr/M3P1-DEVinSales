@@ -221,4 +221,38 @@ public class StateControllerUnitTest
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("201"));
         Assert.That(context.City.Count() == 1);
     }
+
+    [Test]
+    public async Task PostStateAddresUsandoStateIdInexistente()
+    {
+        var address = new Address
+        {
+        };
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.PostState(address, 0, 1);
+
+        var expected = result.Result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
+    }
+
+    [Test]
+    public async Task PostStateAddresUsandoCityIdInexistente()
+    {
+        var address = new Address
+        {
+        };
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.PostState(address, 42, 0);
+
+        var expected = result.Result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
+    }
 }
