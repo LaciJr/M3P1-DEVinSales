@@ -26,7 +26,6 @@ public class UserControllerUnitTest
         context.Database.EnsureDeleted();
         context.Database.EnsureCreated();
 
-        context.SaveChanges();
     }
     #endregion
     [SetUp]
@@ -260,8 +259,9 @@ public class UserControllerUnitTest
 
         var result = controller.DeleteUser(0);
 
-        var expected = (result.Result as ObjectResult).Value;
+        var expected = (result.Result as ObjectResult);
 
-        Assert.That(expected.ToString(), Is.EqualTo("O Id de Usuário de número 0 não foi encontrado."));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("O Id de Usuário de número 0 não foi encontrado."));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
     }
 }
