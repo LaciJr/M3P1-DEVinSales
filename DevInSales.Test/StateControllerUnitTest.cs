@@ -145,7 +145,7 @@ public class StateControllerUnitTest
     }
 
     [Test]
-    public async Task PutState()
+    public async Task PutStateTest()
     {
         var state = new State
         {
@@ -182,5 +182,43 @@ public class StateControllerUnitTest
         var expected = result as StatusCodeResult;
 
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
+    }
+
+    [Test]
+    public async Task PostStateUsandoStateIdInexistente()
+    {
+        var city = new City
+        {
+        };
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.PostState(city, 0);
+
+        var expected = result.Result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
+    }
+
+    [Test]
+    public async Task PostStateTest()
+    {
+        var city = new City
+        {
+            Id = 1,
+            Name = "Florianópolis",
+            State_Id = 42,
+        };
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.PostState(city, 42);
+
+        var expected = result.Result as ObjectResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("201"));
+        Assert.That(context.City.Count() == 1);
     }
 }
