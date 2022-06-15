@@ -109,4 +109,18 @@ public class StateControllerUnitTest
         Assert.That(expected.Value.ToString(), Is.EqualTo("{ message = State_Id não encontrado }"));
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
     }
+
+    [Test]
+    public async Task GetCitybyStateIdUsandoStateIdInexistente()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.GetByStateIdCity(0, null);
+
+        var expected = result.Result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
+    }
 }
