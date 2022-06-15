@@ -39,7 +39,7 @@ public class SqlContext : DbContext
 
         modelBuilder.Entity<State>().HasData(StateSeed.Seed);
 
-        modelBuilder.Entity<City>().HasData(CitySeed.Seed());
+        //modelBuilder.Entity<City>().HasData(CitySeed.Seed());
 
         modelBuilder.Entity<Address>().HasData(AddressSeed.Seed);
 
