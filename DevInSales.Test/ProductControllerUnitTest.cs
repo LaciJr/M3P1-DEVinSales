@@ -307,4 +307,83 @@ public class ProductControllerUnitTest
 
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("204"));
     }
+
+    [Test]
+    public async Task PatchProductUsandoIdInexistente()
+    {
+        var product = new ProductPatchDTO
+        {
+            Name = "Curso de C#",
+            Suggested_Price = 239.99M
+        };
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new ProductController(context);
+
+        var result = await controller.PatchProduct(0, product);
+
+        var expected = (result.Result as StatusCodeResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+    }
+
+    [Test]
+    public async Task PatchProductUsandoNameNulo()
+    {
+        var product = new ProductPatchDTO
+        {
+            Name = null,
+            Suggested_Price = 100m,
+        };
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new ProductController(context);
+
+        var result = await controller.PatchProduct(5, product);
+
+        var expected = (result.Result as StatusCodeResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("204"));
+    }
+
+    [Test]
+    public async Task PatchProductUsandoNameExistente()
+    {
+        var product = new ProductPatchDTO
+        {
+            Name = "Curso de Java",
+            Suggested_Price = 100m,
+        };
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new ProductController(context);
+
+        var result = await controller.PatchProduct(2, product);
+
+        var expected = (result.Result as StatusCodeResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+    }
+
+    [Test]
+    public async Task PatchProductUsandoNameEPriceNulo()
+    {
+        var product = new ProductPatchDTO
+        {
+            Name = null,
+        };
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new ProductController(context);
+
+        var result = await controller.PatchProduct(2, product);
+
+        var expected = (result.Result as StatusCodeResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+    }
 }
