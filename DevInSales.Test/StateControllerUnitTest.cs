@@ -125,6 +125,83 @@ public class StateControllerUnitTest
     }
 
     [Test]
+    public async Task GetCitybyStateIdCityComCityInexistente()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.GetByStateIdCity(42, "Abacaxi");
+
+        var expected = result.Result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("204"));
+    }
+
+    [Test]
+    public async Task GetCitybyStateIdUsandoCityDeOutroState()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var city = new City
+        {
+            Id = 1,
+            Name = "Abacaxi",
+            State_Id = 11
+        };
+        context.City.Add(city);
+
+        var controller = new StateController(context);
+
+        var result = await controller.GetByStateIdCityId(42, 1);
+
+        var expected = result.Result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+    }
+
+    [Test]
+    public async Task GetCitybyStateIdCityIdUsandoIdInexistente()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new StateController(context);
+
+        var result = await controller.GetByStateIdCityId(0, 0);
+
+        var expected = result.Result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
+    }
+
+    [Test]
+    public async Task GetCitybyStateIdCityIdTest()
+    {
+        var city = new City
+        {
+            Id = 1,
+            Name = "Florianopolis",
+            State_Id = 42,
+        };
+
+        var context = new SqlContext(_contextOptions);
+        context.Add(city);
+
+        var controller = new StateController(context);
+
+        var result = await controller.GetByStateIdCityId(42, 1);
+
+        var expected = result.Result as ObjectResult;
+
+        var content = expected.Value as CityStateDTO;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
+        Assert.That(content.State_Id, Is.EqualTo(42));
+        Assert.That(content.City_Id, Is.EqualTo(1));
+        Assert.That(content.Name_City, Is.EqualTo("Florianopolis"));
+    }
+
+    [Test]
     public async Task PutStateUsandoIdDiferenteDoStateId()
     {
         var state = new State
