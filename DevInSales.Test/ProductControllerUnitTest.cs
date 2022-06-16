@@ -131,4 +131,180 @@ public class ProductControllerUnitTest
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
         Assert.That(content.Count(), Is.EqualTo(10));
     }
+
+    [Test]
+    public async Task PostProductUsandoProdutoExistente()
+    {
+        var product = new ProductPostAndPutDTO
+        {
+            Name = "Curso de C Sharp",
+            CategoryId = 1,
+            Suggested_Price = 13m
+        };
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new ProductController(context);
+
+        var result = await controller.PostProduct(product);
+
+        var expected = (result.Result as ObjectResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("Já existe um produto com este nome."));
+    }
+
+    [Test]
+    public async Task PostProductUsandoPriceInvalido()
+    {
+        var product = new ProductPostAndPutDTO
+        {
+            Name = "Teste",
+            CategoryId = 1,
+            Suggested_Price = 0m
+        };
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new ProductController(context);
+
+        var result = await controller.PostProduct(product);
+
+        var expected = (result.Result as ObjectResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("O preço sugerido não pode ser menor ou igual a 0."));
+    }
+
+    [Test]
+    public async Task PostProductTest()
+    {
+        var product = new ProductPostAndPutDTO
+        {
+            Name = "Abacaxi",
+            CategoryId = 1,
+            Suggested_Price = 13m
+        };
+
+        var context = new SqlContext(_contextOptions);
+        var qtdProduct = context.Product.Count() + 1;
+
+        var controller = new ProductController(context);
+
+        var result = await controller.PostProduct(product);
+
+        var expected = (result.Result as ObjectResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("201"));
+        Assert.That(context.Product.Count(), Is.EqualTo(qtdProduct));
+    }
+
+    [Test]
+    public async Task PutProductUsandoIdInexistente()
+    {
+        var product = new ProductPostAndPutDTO
+        {
+            Name = "Teste",
+            CategoryId = 1,
+            Suggested_Price = 13m
+        };
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new ProductController(context);
+
+        var result = await controller.PutProduct(0 ,product);
+
+        var expected = (result.Result as ObjectResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("Não existe um produto com esta Id."));
+    }
+
+    [Test]
+    public async Task PutProductUsandoNomeExistente()
+    {
+        var product = new ProductPostAndPutDTO
+        {
+            Name = "Curso de Java",
+            CategoryId = 1,
+            Suggested_Price = 13m
+        };
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new ProductController(context);
+
+        var result = await controller.PutProduct(2, product);
+
+        var expected = (result.Result as ObjectResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("Já existe um produto com este nome."));
+    }
+
+    [Test]
+    public async Task PutProductUsandoPriceInvalido()
+    {
+        var product = new ProductPostAndPutDTO
+        {
+            Name = "Teste",
+            CategoryId = 1,
+            Suggested_Price = 0m
+        };
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new ProductController(context);
+
+        var result = await controller.PutProduct(1, product);
+
+        var expected = (result.Result as ObjectResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("O preço sugerido não pode ser menor ou igual a 0."));
+    }
+
+    [Test]
+    public async Task PutProductUsandoNomeNulo()
+    {
+        var product = new ProductPostAndPutDTO
+        {
+            Name = null,
+            CategoryId = 1,
+            Suggested_Price = 10m
+        };
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new ProductController(context);
+
+        var result = await controller.PutProduct(1, product);
+
+        var expected = (result.Result as ObjectResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("Nome ou Preço Sugerido são Nulos."));
+    }
+
+    [Test]
+    public async Task PutProductTest()
+    {
+        var product = new ProductPostAndPutDTO
+        {
+            Name = "Curso de C#",
+            CategoryId = 1,
+            Suggested_Price = 239.99M
+        };
+
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new ProductController(context);
+
+        var result = await controller.PutProduct(1, product);
+
+        var expected = (result.Result as StatusCodeResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("204"));
+    }
 }
