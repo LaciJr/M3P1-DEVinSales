@@ -57,16 +57,18 @@ public class UserControllerUnitTest
 
         var result = await controller.Get("TESTE", "25/03/1997", "14/06/2022");
 
-        var expected = (result.Result as ObjectResult).Value;
+        var expected = (result.Result as ObjectResult);
 
-        Assert.That(expected.ToString(), Is.EqualTo("Nenhum usuário foi encontrado."));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("Nenhum usuário foi encontrado."));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
     }
 
     [Test]
     public async Task GetUsersTestFiltrandoPorNome()
     {
         var context = new SqlContext(_contextOptions);
-
+        var user = context.User.FirstAsync(user => user.Name.Contains("Romeu"));
+        
         var controller = new UserController(context);
 
         var result = await controller.Get("Romeu", null, null);
@@ -76,13 +78,15 @@ public class UserControllerUnitTest
         var content = expected.Value as List<UserResponseDTO>;
 
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
-        Assert.That(content[0].Name.Contains("Romeu"));
+        Assert.That(content[0].Name.Contains(user.Result.Name));
     }
 
     [Test]
     public async Task GetUsersTestFiltrandoPorDataMinima()
     {
         var context = new SqlContext(_contextOptions);
+        var date = new DateTime(2000, 02, 01);
+        var user = await context.User.FirstAsync(user => user.BirthDate >= date);
 
         var controller = new UserController(context);
 
@@ -92,7 +96,7 @@ public class UserControllerUnitTest
 
         var content = expected.Value as List<UserResponseDTO>;
 
-        Assert.That(content[0].Name.Contains("Romeu"));
+        Assert.That(content[0].BirthDate >= date);
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
     }
 
@@ -100,6 +104,8 @@ public class UserControllerUnitTest
     public async Task GetUsersTestFiltrandoPorDataMaxima()
     {
         var context = new SqlContext(_contextOptions);
+        var date = new DateTime(1974, 04, 11);
+        var user = await context.User.FirstAsync(user => user.BirthDate <= date);
 
         var controller = new UserController(context);
 
@@ -110,7 +116,7 @@ public class UserControllerUnitTest
         var content = expected.Value as List<UserResponseDTO>;
 
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
-        Assert.That(content[0].Name.Contains("Gustavo"));
+        Assert.That(content[0].BirthDate <= date);
     }
 
 
@@ -250,30 +256,32 @@ public class UserControllerUnitTest
     }
 
     [Test]
-    public void DeleteUserTest()
+    public async Task DeleteUserTest()
     {
         var context = new SqlContext(_contextOptions);
+        var qtdUser = context.User.Count();
 
         var controller = new UserController(context);
 
-        var result = controller.DeleteUser(5);
+        var result = await controller.DeleteUser(5);
 
-        var expected = (result.Result as ObjectResult);
+        var expected = (result as ObjectResult);
 
         Assert.That(expected.Value.ToString(), Is.EqualTo("5"));
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
+        Assert.That(context.User.Count() == qtdUser - 1);
     }
 
     [Test]
-    public void DeleteUserComIdInvalido()
+    public async Task DeleteUserComIdInvalido()
     {
         var context = new SqlContext(_contextOptions);
 
         var controller = new UserController(context);
 
-        var result = controller.DeleteUser(0);
+        var result = await controller.DeleteUser(0);
 
-        var expected = (result.Result as ObjectResult);
+        var expected = (result as ObjectResult);
 
         Assert.That(expected.Value.ToString(), Is.EqualTo("O Id de Usuário de número 0 não foi encontrado."));
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
