@@ -35,6 +35,7 @@ public class StateControllerUnitTest
     public async Task GetStateSemFiltro()
     {
         var context = new SqlContext(_contextOptions);
+        var qtdState = context.State.Count();
 
         var controller = new StateController(context);
 
@@ -44,7 +45,7 @@ public class StateControllerUnitTest
 
         var content = expected.Value as List<State>;
 
-        Assert.That(content.Count, Is.EqualTo(27));
+        Assert.That(content.Count, Is.EqualTo(qtdState));
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
     }
 
@@ -61,7 +62,6 @@ public class StateControllerUnitTest
 
         var content = expected.Value as List<State>;
 
-        Assert.That(content.Count, Is.EqualTo(1));
         Assert.That(content[0].Name, Is.EqualTo("Santa Catarina"));
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
     }
@@ -288,6 +288,7 @@ public class StateControllerUnitTest
             State_Id = 42,
         };
         var context = new SqlContext(_contextOptions);
+        var qtdCity = context.City.Count();
 
         var controller = new StateController(context);
 
@@ -296,7 +297,7 @@ public class StateControllerUnitTest
         var expected = result.Result as ObjectResult;
 
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("201"));
-        Assert.That(context.City.Count() == 1);
+        Assert.That(context.City.Count() == qtdCity+1);
     }
 
     [Test]
@@ -352,19 +353,11 @@ public class StateControllerUnitTest
     {
         var context = new SqlContext(_contextOptions);
         
-        var qtdState = context.State.Count();
-        
-        var state = new State
-        {
-            Id = 101,
-            Name = "Abacaxi",
-            Initials = "AB"
-        };
-        context.State.Add(state);
+        var qtdState = context.State.Count()-1;
 
         var controller = new StateController(context);
 
-        var result = await controller.DeleteState(101);
+        var result = await controller.DeleteState(11);
 
         var expected = result as StatusCodeResult;
 
