@@ -34,14 +34,18 @@ public class UserControllerUnitTest
     public async Task GetUsersTestSemFiltro()
     {
         var context = new SqlContext(_contextOptions);
+        var qtdUser = context.User.Count();
 
         var controller = new UserController(context);
 
         var result = await controller.Get(null, null, null);
 
-        var expected = (result.Result as ObjectResult).Value as List<UserResponseDTO>;
+        var expected = (result.Result as ObjectResult);
 
-        Assert.That(expected.Count, Is.EqualTo(4));
+        var content = expected.Value as List<UserResponseDTO>;
+
+        Assert.That(content.Count, Is.EqualTo(qtdUser));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
     }
 
     [Test]
@@ -67,10 +71,12 @@ public class UserControllerUnitTest
 
         var result = await controller.Get("Romeu", null, null);
 
-        var expected = (result.Result as ObjectResult).Value as List<UserResponseDTO>;
+        var expected = (result.Result as ObjectResult);
 
-        Assert.That(expected.Count, Is.EqualTo(1));
-        Assert.That(expected[0].Name.Contains("Romeu"));
+        var content = expected.Value as List<UserResponseDTO>;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
+        Assert.That(content[0].Name.Contains("Romeu"));
     }
 
     [Test]
@@ -82,10 +88,12 @@ public class UserControllerUnitTest
 
         var result = await controller.Get(null, "01/02/2000", null);
 
-        var expected = (result.Result as ObjectResult).Value as List<UserResponseDTO>;
+        var expected = (result.Result as ObjectResult);
 
-        Assert.That(expected.Count, Is.EqualTo(1));
-        Assert.That(expected[0].Name.Contains("Romeu"));
+        var content = expected.Value as List<UserResponseDTO>;
+
+        Assert.That(content[0].Name.Contains("Romeu"));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
     }
 
     [Test]
@@ -97,10 +105,12 @@ public class UserControllerUnitTest
 
         var result = await controller.Get(null, null, "11/04/1974");
 
-        var expected = (result.Result as ObjectResult).Value as List<UserResponseDTO>;
+        var expected = (result.Result as ObjectResult);
 
-        Assert.That(expected.Count, Is.EqualTo(1));
-        Assert.That(expected[0].Name.Contains("Gustavo"));
+        var content = expected.Value as List<UserResponseDTO>;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
+        Assert.That(content[0].Name.Contains("Gustavo"));
     }
 
 
@@ -116,6 +126,8 @@ public class UserControllerUnitTest
 
         var context = new SqlContext(_contextOptions);
 
+        var qtdUser = context.User.Count();
+
         var controller = new UserController(context);
 
         var result = await controller.Create(userDTO);
@@ -123,7 +135,7 @@ public class UserControllerUnitTest
         var expected = (result.Result as ObjectResult);
 
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("201"));
-        Assert.That(context.User.Count() == 5);
+        Assert.That(context.User.Count() == qtdUser+1);
 
     }
 
@@ -143,9 +155,10 @@ public class UserControllerUnitTest
 
         var result = await controller.Create(userDTO);
 
-        var expected = (result.Result as ObjectResult).Value;
+        var expected = (result.Result as ObjectResult);
 
-        Assert.That(expected.ToString(), Is.EqualTo("O usuário deve ser maior de 18 anos."));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("O usuário deve ser maior de 18 anos."));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
     }
 
     [Test]
@@ -164,9 +177,10 @@ public class UserControllerUnitTest
 
         var result = await controller.Create(userDTO);
 
-        var expected = (result.Result as ObjectResult).Value;
+        var expected = (result.Result as ObjectResult);
 
-        Assert.That(expected.ToString(), Is.EqualTo("Data inválida."));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("Data inválida."));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
     }
 
     [Test]
@@ -185,9 +199,10 @@ public class UserControllerUnitTest
 
         var result = await controller.Create(userDTO);
 
-        var expected = (result.Result as ObjectResult).Value;
+        var expected = (result.Result as ObjectResult);
 
-        Assert.That(expected.ToString(), Is.EqualTo("Senha inválida. Deve-se ter pelo menos um caractere diferente dos demais."));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("Senha inválida. Deve-se ter pelo menos um caractere diferente dos demais."));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
     }
 
     [Test]
@@ -206,9 +221,10 @@ public class UserControllerUnitTest
 
         var result = await controller.Create(userDTO);
 
-        var expected = (result.Result as ObjectResult).Value;
+        var expected = (result.Result as ObjectResult);
 
-        Assert.That(expected.ToString(), Is.EqualTo("O email informado já existe."));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("O email informado já existe."));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
     }
 
     [Test]
@@ -227,9 +243,10 @@ public class UserControllerUnitTest
 
         var result = await controller.Create(userDTO);
 
-        var expected = (result.Result as ObjectResult).Value;
+        var expected = (result.Result as ObjectResult);
 
-        Assert.That(expected.ToString(), Is.EqualTo("O perfil informado não foi encontrado."));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("O perfil informado não foi encontrado."));
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
     }
 
     [Test]
