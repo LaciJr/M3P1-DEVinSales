@@ -53,6 +53,7 @@ public class StateControllerUnitTest
     public async Task GetStateFiltrandoPeloNome()
     {
         var context = new SqlContext(_contextOptions);
+        var state = await context.State.FirstAsync(state => state.Name.Contains("Santa Catarina"));
 
         var controller = new StateController(context);
 
@@ -62,7 +63,7 @@ public class StateControllerUnitTest
 
         var content = expected.Value as List<State>;
 
-        Assert.That(content[0].Name, Is.EqualTo("Santa Catarina"));
+        Assert.That(content[0].Name.Contains(state.Name));
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
     }
 
@@ -136,6 +137,32 @@ public class StateControllerUnitTest
         var expected = result.Result as StatusCodeResult;
 
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("204"));
+    }
+
+    [Test]
+    public async Task GetCitybyStateIdCityComNameNull()
+    {
+        var context = new SqlContext(_contextOptions);
+        var state = await context.State.FindAsync(42);
+        var city = new City
+        {
+            Id = 2,
+            Name = "Florianopolis",
+            State_Id = 42,
+            State = state
+        };
+        await context.City.AddAsync(city);
+        await context.SaveChangesAsync();
+
+        var controller = new StateController(context);
+
+        var result = await controller.GetByStateIdCity(42, "Florianopolis");
+
+        var expected = result.Result as ObjectResult;
+        var content = expected.Value as List<CityStateDTO>;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
+        Assert.That(content[0].Name_City, Is.EqualTo(city.Name));
     }
 
     [Test]
@@ -335,9 +362,105 @@ public class StateControllerUnitTest
     }
 
     [Test]
+    public async Task PostStateAddresUsandoCityDeOutroState()
+    {
+        var context = new SqlContext(_contextOptions);
+        var state = await context.State.FindAsync(42);
+        var city = new City
+        {
+            Id = 2,
+            Name = "Florianopolis",
+            State_Id = 42,
+            State = state
+        };
+        await context.City.AddAsync(city);
+
+        var address = new Address
+        {
+        };
+
+        var controller = new StateController(context);
+
+        var result = await controller.PostState(address, 41, 2);
+
+        var expected = result.Result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+    }
+
+    [Test]
+    public async Task PostStateAddresUsandoAddresInvalido()
+    {
+        var context = new SqlContext(_contextOptions);
+        var state = await context.State.FindAsync(42);
+        var city = new City
+        {
+            Id = 2,
+            Name = "Florianopolis",
+            State_Id = 42,
+            State = state
+        };
+        await context.City.AddAsync(city);
+
+        var address = new Address
+        {
+            Id = 4,
+            City = city,
+            City_Id = 2,
+            Street = "",
+            Number = 0,
+            CEP = null
+        };
+
+        var controller = new StateController(context);
+
+        var result = await controller.PostState(address, 42, 2);
+
+        var expected = result.Result as StatusCodeResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+    }
+
+    [Test]
+    public async Task PostStateAddresUsandoAddresTest()
+    {
+        var context = new SqlContext(_contextOptions);
+        var state = await context.State.FindAsync(42);
+        var city = new City
+        {
+            Id = 3,
+            Name = "Florianopolis",
+            State_Id = 42,
+            State = state
+        };
+        await context.City.AddAsync(city);
+
+        var address = new Address
+        {
+            Id = 4,
+            City = city,
+            City_Id = 2,
+            Street = "Rua fulano",
+            Number = 49,
+            CEP = "999999-99"
+        };
+        var qtdAddress = context.Address.Count();
+
+        var controller = new StateController(context);
+
+        var result = await controller.PostState(address, 42, 2);
+
+        var expected = result.Result as ObjectResult;
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("201"));
+        Assert.That(context.Address.Count() == qtdAddress + 1);
+    }
+
+    [Test]
     public async Task DeleteStateUsandoStateIdInexistente()
     {
         var context = new SqlContext(_contextOptions);
+        var qtdState = context.State.Count();
 
         var controller = new StateController(context);
 
@@ -346,6 +469,7 @@ public class StateControllerUnitTest
         var expected = result as StatusCodeResult;
 
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
+        Assert.That(context.State.Count(), Is.EqualTo(qtdState));
     }
 
     [Test]
@@ -353,7 +477,7 @@ public class StateControllerUnitTest
     {
         var context = new SqlContext(_contextOptions);
         
-        var qtdState = context.State.Count()-1;
+        var qtdState = context.State.Count();
 
         var controller = new StateController(context);
 
@@ -362,6 +486,6 @@ public class StateControllerUnitTest
         var expected = result as StatusCodeResult;
 
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("204"));
-        Assert.That(context.State.Count() == qtdState);
+        Assert.That(context.State.Count() == qtdState-1);
     }
 }
