@@ -119,6 +119,7 @@ public class ProductControllerUnitTest
     public async Task GetProductTest()
     {
         var context = new SqlContext(_contextOptions);
+        var qtdProduct = context.Product.Count();
 
         var controller = new ProductController(context);
 
@@ -129,7 +130,7 @@ public class ProductControllerUnitTest
         var content = expected.Value as List<ProductGetDTO>;
 
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("200"));
-        Assert.That(content.Count(), Is.EqualTo(10));
+        Assert.That(content.Count(), Is.EqualTo(qtdProduct));
     }
 
     [Test]
@@ -385,5 +386,77 @@ public class ProductControllerUnitTest
         var expected = (result.Result as StatusCodeResult);
 
         Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+    }
+
+    [Test]
+    public async Task DeleteProductUsandoIdInexistente()
+    {
+        var context = new SqlContext(_contextOptions);
+
+        var controller = new ProductController(context);
+
+        var result = await controller.DeleteProduct(0);
+
+        var expected = (result as ObjectResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("404"));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("O Id de Produto de número 0 não foi encontrado."));
+    }
+
+    [Test]
+    public async Task DeleteProductComProductEmOrdemDeCompra()
+    {
+        var context = new SqlContext(_contextOptions);
+       
+        var user = await context.User.FindAsync(1);
+        var seller = await context.User.FindAsync(2);
+        var order = new Order
+        {
+            Id = 1,
+            User = user,
+            UserId = 1,
+            Seller = seller,
+            SellerId = 2,
+            Date_Order = DateTime.Now,
+            Shipping_Company = "Sedex",
+            Shipping_Company_Price = 22m,
+        };
+        var product = await context.Product.FindAsync(3);
+        var orderProduct = new OrderProduct
+        {
+            Id = 1,
+            Unit_Price = 189.99M,
+            Amount = 1,
+            Order = order,
+            Product = product
+        };
+        await context.Order_Product.AddAsync(orderProduct);
+
+        await context.SaveChangesAsync();
+        
+        var controller = new ProductController(context);
+
+        var result = await controller.DeleteProduct(3);
+
+        var expected = (result as ObjectResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("400"));
+        Assert.That(expected.Value.ToString(), Is.EqualTo("O Id de Produto de número 3 possui uma Ordem de Produto vinculada, por este motivo não pode ser deletado."));
+    }
+
+    [Test]
+    public async Task DeleteProductTest()
+    {
+        var context = new SqlContext(_contextOptions);
+        var qtdProduct = context.Product.Count() - 1;
+
+        var controller = new ProductController(context);
+
+        var result = await controller.DeleteProduct(10);
+
+        var expected = (result as StatusCodeResult);
+
+        Assert.That(expected.StatusCode.ToString(), Is.EqualTo("204"));
+        Assert.That(context.Product.Count() == qtdProduct);
     }
 }
